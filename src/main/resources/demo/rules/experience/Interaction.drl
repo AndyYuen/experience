@@ -1,0 +1,95 @@
+package demo.rules.experience;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+//import com.redhat.experience.service.CustomerService;
+
+//global CustomerService service;
+
+
+function long toMinutes(String dateString) {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    return formatter.parse(dateString.substring(0, 19)).getTime() / 60000;
+}
+
+rule "cleanup"
+	dialect "mvel"
+	salience 10
+
+	when
+		$updated : Flight(operational_status == "Planned")
+		$calc : Calculation(airlineCode == $updated.airline_code, flightNumber == $updated.flight_number)
+	then
+		System.out.println("Executed Rule: " + drools.getRule().getName() );
+        retract($calc);
+
+end
+
+rule "cleanup_disruption"
+	dialect "mvel"
+	salience 10
+
+	when
+		$updated : Flight(operational_status == "Planned")
+		$disruption : Disruption(airlineCode == $updated.airline_code, flightNumber == $updated.flight_number)
+	then
+		System.out.println("Executed Rule: " + drools.getRule().getName() );
+        retract($disruption);
+
+end
+
+rule "calc_delay"
+	dialect "mvel"
+	
+
+	when
+		$scheduled : Flight(operational_status == "Scheduled")
+		$updated : Flight(operational_status == "Planned", airline_code == $scheduled.airline_code, flight_number == $scheduled.flight_number)
+	then
+		System.out.println("Executed Rule: " + drools.getRule().getName() );
+        insert(new demo.rules.experience.Calculation("Unchanged", $scheduled.airline_code, $scheduled.flight_number,
+            toMinutes($updated.schedule_departure_local) - toMinutes($scheduled.schedule_departure_local)
+            ));
+        retract($updated);
+
+end
+
+rule "disruption"
+	dialect "mvel"
+	salience -10
+
+	when
+		$calc : demo.rules.experience.Calculation(impactRating != "Unchanged")
+	then
+	    System.out.println("Executed Rule: " + drools.getRule().getName() );
+	    insert(new demo.rules.experience.Disruption($calc.impactRating, $calc.airlineCode, $calc.flightNumber,
+            $calc.delayInMinutes
+            ));
+        //retract($calc);
+
+end
+
+rule "disruption_processing"
+	dialect "mvel"
+	salience -20
+
+	when
+		$disruption : demo.rules.experience.Disruption( )
+	then
+	    System.out.println("Executed Rule: " + drools.getRule().getName() );
+	    //service.sendVipList($disruption.airlineCode + $disruption.flightNumber, 3);
+        //retract($disruption);
+
+end
+
+query "get_disruption_object" 
+     $disruption : demo.rules.experience.Disruption( )
+end
+
+query "get_flight_object" 
+     $flight : demo.rules.experience.Flight( )
+end
+
+query "get_calculation_object" 
+     $cal : demo.rules.experience.Calculation()
+end
