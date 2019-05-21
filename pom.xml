@@ -7,6 +7,14 @@
   <version>1.6</version>
   <packaging>kjar</packaging>
   <name>experience</name>
+  <description>A demo to show how to call external services</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.redhat.experience</groupId>
+      <artifactId>CustomerRating</artifactId>
+      <version>1.8.3</version>
+    </dependency>
+  </dependencies>
   <repositories>
     <repository>
       <id>guvnor-m2-repo</id>

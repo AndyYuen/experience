@@ -1,0 +1,13 @@
+package demo.rules.experience;
+
+import java.lang.Number;
+
+rule "vip_passenger_processing"
+	dialect "mvel"
+	when
+		There is a Disruption Object identified as $disruption
+		There is a Passenger Object identified as $passenger
+	then
+		Log name of this rule
+		From info contained in Disruption Object $disruption and Passenger Object $passenger notify VIP identified
+end

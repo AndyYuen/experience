@@ -1,0 +1,15 @@
+package demo.rules.experience;
+
+import java.lang.Number;
+import java.util.List;
+
+rule "disruption_processing"
+	dialect "mvel"
+	when
+		There is a Disruption Object identified as $disruption
+	then
+		Log name of this rule
+		From info contained in Disruption Object $disruption retrieve Passenger List and call it passengerList
+		Using Passenger list named passengerList retrieve Top 3 VIPs in a list and call it topList
+		Using top VIP list named topList insert each VIP into working memory
+end

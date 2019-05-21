@@ -2,9 +2,10 @@ package demo.rules.experience;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-//import com.redhat.experience.service.CustomerService;
+import java.util.List;
+import com.redhat.experience.service.CustomerService;
 
-//global CustomerService service;
+global CustomerService service;
 
 
 function long toMinutes(String dateString) {
@@ -68,7 +69,7 @@ rule "disruption"
         //retract($calc);
 
 end
-
+/*
 rule "disruption_processing"
 	dialect "mvel"
 	salience -20
@@ -78,10 +79,31 @@ rule "disruption_processing"
 	then
 	    System.out.println("Executed Rule: " + drools.getRule().getName() );
 	    //service.sendVipList($disruption.airlineCode + $disruption.flightNumber, 3);
+	    List list = service.retrievePassengersFromRest($disruption.flightNumber);
+	    List topList = service.getTopList(list, 3);
+	    for (Passenger topPassenger : topList) {
+	        insert(topPassenger);
+			System.out.println(topPassenger);
+			System.out.println("-----------");
+		}
         //retract($disruption);
 
 end
 
+rule "vip_passenger_processing"
+	dialect "mvel"
+	
+	when
+		$passenger : demo.rules.experience.Passenger( )
+		$disruption : demo.rules.experience.Disruption( )
+	then
+	    System.out.println("Executed Rule: " + drools.getRule().getName() );
+	    service.sendVip($disruption.flightNumber, $passenger);
+
+        //retract($disruption);
+
+end
+*/
 query "get_disruption_object" 
      $disruption : demo.rules.experience.Disruption( )
 end
