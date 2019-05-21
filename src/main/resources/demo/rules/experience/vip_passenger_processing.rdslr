@@ -4,6 +4,7 @@ import java.lang.Number;
 
 rule "vip_passenger_processing"
 	dialect "mvel"
+	salience -20
 	when
 		There is a Disruption Object identified as $disruption
 		There is a Passenger Object identified as $passenger
